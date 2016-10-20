@@ -96,112 +96,102 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
 	});
 	
 	var _utils = __webpack_require__(4);
 	
 	exports.default = {
-	  props: {
-	    resource_url: {
-	      type: String,
-	      required: true
+	    props: {
+	        resource_url: {
+	            type: String,
+	            required: true
+	        },
+	        custom_template: '',
+	        options: {
+	            type: Object,
+	            required: false,
+	            default: function _default() {
+	                return {};
+	            }
+	        }
 	    },
-	    custom_template: '',
-	    options: {
-	      type: Object,
-	      required: false,
-	      default: function _default() {
-	        return {};
-	      }
-	    }
-	  },
-	  data: function data() {
-	    return {
-	      current_page: '',
-	      last_page: '',
-	      next_page_url: '',
-	      prev_page_url: '',
-          current_page_url:'',
-	      config: {
-	        remote_data: 'data',
-	        remote_current_page: 'current_page',
-	        remote_last_page: 'last_page',
-	        remote_next_page_url: 'next_page_url',
-	        remote_prev_page_url: 'prev_page_url',
-	        remote_current_page_url: 'current_page_url',
-	        previous_button_text: 'Previous',
-	        next_button_text: 'Next'
-	      }
-	    };
-	  },
+	    data: function data() {
+	        return {
+	            current_page: '',
+	            last_page: '',
+	            next_page_url: '',
+	            prev_page_url: '',
+	            current_page_url: '',
+	            config: {
+	                remote_data: 'data',
+	                remote_current_page: 'current_page',
+	                remote_last_page: 'last_page',
+	                remote_current_page_url: 'current_page_url',
+	                remote_next_page_url: 'next_page_url',
+	                remote_prev_page_url: 'prev_page_url',
+	                previous_button_text: 'Previous',
+	                next_button_text: 'Next'
+	            }
+	        };
+	    },
 	
-	  methods: {
-	    fetchData: function fetchData(pageUrl) {
-	      pageUrl = pageUrl || this.resource_url;
-	      var self = this;
-	      this.$http.get(pageUrl, { headers: this.config.headers }).then(function (response) {
-	        self.handleResponseData(response.data);
-	      }).catch(function (response) {
-	        console.log('Fetching data failed.', response);
-	      });
+	    methods: {
+	        fetchData: function fetchData(pageUrl) {
+	            pageUrl = pageUrl || this.resource_url;
+	            var self = this;
+	            this.$http.get(pageUrl, {
+	                headers: this.config.headers
+	            }).then(function (response) {
+	                self.handleResponseData(response.data);
+	            }).catch(function (response) {
+	                console.log('Fetching data failed.', response);
+	            });
+	        },
+	        handleResponseData: function handleResponseData(response) {
+	            this.makePagination(response);
+	            var data = _utils.utils.getNestedValue(response, this.config.remote_data);
+	            this.$emit('update', data);
+	        },
+	        makePagination: function makePagination(data) {
+	            this.current_page = _utils.utils.getNestedValue(data, this.config.remote_current_page);
+	            this.last_page = _utils.utils.getNestedValue(data, this.config.remote_last_page);
+	            this.current_page_url = _utils.utils.getNestedValue(data, this.config.remote_current_page_url);
+	            this.next_page_url = this.current_page === this.last_page ? null : _utils.utils.getNestedValue(data, this.config.remote_next_page_url);
+	            this.prev_page_url = this.current_page === 1 ? null : _utils.utils.getNestedValue(data, this.config.remote_prev_page_url);
+	        },
+	        initConfig: function initConfig() {
+	            this.config = _utils.utils.merge_objects(this.config, this.options);
+	        }
 	    },
-	    handleResponseData: function handleResponseData(response) {
-	      this.makePagination(response);
-	      var data = _utils.utils.getNestedValue(response, this.config.remote_data);
-	      this.$emit('update', data);
+	    watch: {
+	        resource_url: function resource_url() {
+	            this.fetchData();
+	        }
 	    },
-	    makePagination: function makePagination(data) {
-	      this.current_page = _utils.utils.getNestedValue(data, this.config.remote_current_page);
-	      this.last_page = _utils.utils.getNestedValue(data, this.config.remote_last_page);
-	      this.current_page_url = _utils.utils.getNestedValue(data, this.config.remote_current_page_url);
-	      this.next_page_url = this.current_page === this.last_page ? null : _utils.utils.getNestedValue(data, this.config.remote_next_page_url);
-	      this.prev_page_url = this.current_page === 1 ? null : _utils.utils.getNestedValue(data, this.config.remote_prev_page_url);
+	    created: function created() {
+	        this.initConfig();
+	        this.fetchData();
 	    },
-	    initConfig: function initConfig() {
-	      this.config = _utils.utils.merge_objects(this.config, this.options);
+	
+	    events: {
+	        onRefresh: function onRefresh() {
+	            this.fetchData(this.current_page_url);
+	        }
 	    }
-	  },
-	  watch: {
-	    resource_url: function resource_url() {
-	      this.fetchData();
-	    }
-	  },
-	  created: function created() {
-	    this.initConfig();
-	    this.fetchData();
-	  },
-	  events: {
-	      onRefresh: function onRefresh() {
-	          //console.log(this.current_page_url);
-	          this.fetchData(this.current_page_url);
-	      }
-	  }
-
 	};
 	// </script>
 	// <template>
-	
 	//   <div class="v-paginator">
-	
 	//     <button class="btn btn-default" @click="fetchData(prev_page_url)" :disabled="!prev_page_url">
-	
 	//       {{config.previous_button_text}}
-	
 	//     </button>
-	
 	//     <span>Page {{current_page}} of {{last_page}}</span>
-	
 	//     <button class="btn btn-default" @click="fetchData(next_page_url)" :disabled="!next_page_url">
-	
 	//       {{config.next_button_text}}
-	
 	//     </button>
-	
 	//   </div>
-	
 	// </template>
-	
 	
 	// <script>
 
@@ -242,7 +232,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 5 */
 /***/ function(module, exports) {
 
-	module.exports = "<div class=\"v-paginator\">\r\n    <button class=\"btn btn-default\" @click=\"fetchData(prev_page_url)\" :disabled=\"!prev_page_url\">\r\n      {{config.previous_button_text}}\r\n    </button>\r\n    <span>Page {{current_page}} of {{last_page}}</span>\r\n    <button class=\"btn btn-default\" @click=\"fetchData(next_page_url)\" :disabled=\"!next_page_url\">\r\n      {{config.next_button_text}}\r\n    </button>\r\n  </div>";
+	module.exports = "<div class=\"v-paginator\">\n    <button class=\"btn btn-default\" @click=\"fetchData(prev_page_url)\" :disabled=\"!prev_page_url\">\n      {{config.previous_button_text}}\n    </button>\n    <span>Page {{current_page}} of {{last_page}}</span>\n    <button class=\"btn btn-default\" @click=\"fetchData(next_page_url)\" :disabled=\"!next_page_url\">\n      {{config.next_button_text}}\n    </button>\n  </div>";
 
 /***/ }
 /******/ ])
