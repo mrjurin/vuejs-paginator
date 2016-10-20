@@ -122,12 +122,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      last_page: '',
 	      next_page_url: '',
 	      prev_page_url: '',
+          current_page_url:'',
 	      config: {
 	        remote_data: 'data',
 	        remote_current_page: 'current_page',
 	        remote_last_page: 'last_page',
 	        remote_next_page_url: 'next_page_url',
 	        remote_prev_page_url: 'prev_page_url',
+	        remote_current_page_url: 'current_page_url',
 	        previous_button_text: 'Previous',
 	        next_button_text: 'Next'
 	      }
@@ -152,6 +154,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    makePagination: function makePagination(data) {
 	      this.current_page = _utils.utils.getNestedValue(data, this.config.remote_current_page);
 	      this.last_page = _utils.utils.getNestedValue(data, this.config.remote_last_page);
+	      this.current_page_url = _utils.utils.getNestedValue(data, this.config.remote_current_page_url);
 	      this.next_page_url = this.current_page === this.last_page ? null : _utils.utils.getNestedValue(data, this.config.remote_next_page_url);
 	      this.prev_page_url = this.current_page === 1 ? null : _utils.utils.getNestedValue(data, this.config.remote_prev_page_url);
 	    },
@@ -167,7 +170,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  created: function created() {
 	    this.initConfig();
 	    this.fetchData();
+	  },
+	  events: {
+	      onRefresh: function onRefresh() {
+	          //console.log(this.current_page_url);
+	          this.fetchData(this.current_page_url);
+	      }
 	  }
+
 	};
 	// </script>
 	// <template>
